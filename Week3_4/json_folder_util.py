@@ -59,17 +59,13 @@ async def gen_db(json_folder):
     """
     # json_folder=input("Give the locacion of the extracted database folder:\n")
     outputs = [] 
-    async with asyncio.TaskGroup() as tg: 
-        for filename in os.listdir(json_folder):
-            if filename.endswith('.json'):
-                outputs.append(tg.create_task(gen_json(json_folder,filename)))
-            else: 
-                print(f"{filename} is not json")
+    for filename in os.listdir(json_folder):
+        if filename.endswith('.json'):
+            outputs.append(gen_json(json_folder,filename))
+        else: 
+            print(f"{filename} is not json")
 
-    results = []
-    for out in outputs:
-        results.append(out.result())
-    return results 
+    return await asyncio.gather(*outputs)
 
 if __name__ == "__main__": 
     res = asyncio.run(gen_db("youtube_top100"))
