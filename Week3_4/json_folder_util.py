@@ -35,7 +35,8 @@ class ParsedFile:
 
     def parse_filename(self): 
         """Parses the filename using datetime_from_filename"""
-        datetime_from_filename(self.filename)
+        return datetime_from_filename(self.filename)
+        
  
 async def gen_json(json_folder,filename):
     """
