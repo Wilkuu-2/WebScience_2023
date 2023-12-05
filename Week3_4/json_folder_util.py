@@ -11,7 +11,7 @@ Copyright 2023 Jakub Stachurski, Kalli van den Heuvel
 
 from dataclasses import dataclass
 import asyncio
-from typing import Any
+from typing import Any, List
 import aiofiles
 import datetime
 import json 
@@ -36,7 +36,6 @@ class ParsedFile:
     def parse_filename(self): 
         """Parses the filename using datetime_from_filename"""
         return datetime_from_filename(self.filename)
-        
  
 async def gen_json(json_folder,filename):
     """
@@ -53,24 +52,20 @@ async def gen_json(json_folder,filename):
             print(f"{filepath} is not valid json")
             return ParsedFile(filename,json.loads("{}"))
 
-async def gen_db(json_folder):
+async def gen_db(json_folder) -> List[ParsedFile]:
     """
     Loads a folder of json files asyncronously
     Returns a list of ``ParsedFile objects``
     """
     # json_folder=input("Give the locacion of the extracted database folder:\n")
     outputs = [] 
-    async with asyncio.TaskGroup() as tg: 
-        for filename in os.listdir(json_folder):
-            if filename.endswith('.json'):
-                outputs.append(tg.create_task(gen_json(json_folder,filename)))
-            else: 
-                print(f"{filename} is not json")
+    for filename in os.listdir(json_folder):
+        if filename.endswith('.json'):
+            outputs.append(gen_json(json_folder,filename))
+        else: 
+            print(f"{filename} is not json")
 
-    results = []
-    for out in outputs:
-        results.append(out.result())
-    return results 
+    return await asyncio.gather(*outputs)
 
 if __name__ == "__main__": 
     res = asyncio.run(gen_db("youtube_top100"))
