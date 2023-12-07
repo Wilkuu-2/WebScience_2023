@@ -7,7 +7,7 @@ import numpy as np
 import random
 
 DAY_OFFSET = 0
-NUMBER_OF_DAYS = 7
+NUMBER_OF_DAYS = 365
 BINS = 50
 AMOUNT_SHOWN_IN_TOP = 15
 
@@ -53,7 +53,7 @@ for song in total_song_data:
 data_points, views = list(zip(*total_song_data_squashed))
 hist, edges = np.histogram(views, bins=BINS)
 axis[0,0].scatter(edges[:-1], hist)
-axis[0,0].set_title('Amount of view over period 7 days starting from baseline')
+axis[0,0].set_title('Amount of view over period {} days starting from baseline'.format(NUMBER_OF_DAYS))
 axis[0,0].set_xlabel('Views')
 axis[0,0].set_ylabel('Amount of songs')
 
@@ -79,6 +79,9 @@ for song_data in sorted_total_song_data:
     axis[1,0].plot(data_points, views, label = name[0])
     i += 1;
     if i == AMOUNT_SHOWN_IN_TOP: break
+axis[1,0].set_title('Top {} songs sorted by views'.format(AMOUNT_SHOWN_IN_TOP))
+axis[1,0].set_xlabel('Date')
+axis[1,0].set_ylabel('Views')
 axis[1,0].legend()
 
 # Getting spotify data
