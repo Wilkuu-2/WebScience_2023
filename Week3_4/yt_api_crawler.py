@@ -7,7 +7,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import json 
 import time 
-from datetime import datetime, timedelta, timezone 
+from datetime import datetime, timedelta 
 
 api_service_name = "youtube"
 api_version = "v3"
@@ -20,10 +20,7 @@ def youtube_authenticate(token):
     return googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=token)
 
-now = datetime.utcnow()
-last_year = now - timedelta(365,0,0)
-
-def query(yt,batchsize=25,page_token = None, regionCode="US",language="en", after=last_year,before=now):
+def query(yt,batchsize=25,page_token = None, regionCode="US",language="en"):
     request = yt.search().list(
         part="id",
         maxResults=batchsize,
@@ -36,8 +33,6 @@ def query(yt,batchsize=25,page_token = None, regionCode="US",language="en", afte
         videoDuration="short",
         videoType="any",
         pageToken="" if page_token is None else page_token,
-        publishedBefore=before.isoformat('T') + 'Z', 
-        publishedAfter=after.isoformat('T') + 'Z' 
     )
     
     ids = request.execute()
@@ -63,6 +58,42 @@ def query(yt,batchsize=25,page_token = None, regionCode="US",language="en", afte
     return items, page_token
 
 
+def get_yt_data(token, batchsize=5, number=20, interval=2.0, region="US", language="en"):
+    yt = youtube_authenticate(token)
+
+    dataset = []
+    before = datetime.utcnow()
+    after = before - timedelta(365,0,0)
+
+    page_token = None
+    before = after 
+    after  = before - timedelta(365,0,0) 
+    while len(dataset) < int(number):
+        print(f"Pulling from api with page_token={page_token}")
+        q, page_token = query(yt,
+                              batchsize=min(batchsize, 50),
+                              page_token=page_token,
+                              regionCode=region,
+                              language=language)
+
+        print(f"Fetched {len(q)} items")
+        dataset.extend(q)
+        print(f"Total: {len(dataset)}")
+
+
+        if page_token is None: 
+            print("Could not get the next page token, stopping")
+            break 
+
+        time.sleep(interval)
+
+    return dataset
+
+def write_yt_data(filename, data):
+    with open(filename, "w") as f: 
+        f.write(json.dumps(data)) 
+    f.close()
+
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser(
                         prog='YT_API_Crawler',
@@ -79,38 +110,9 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    yt = youtube_authenticate(args.YT_API_TOKEN)
-     
-    dataset = []
-    before = datetime.utcnow()
-    after = before - timedelta(365,0,0)
+    data = get_yt_data(args.YT_API_TOKEN, batchsize=int(args.batchsize), number=int(args.number), interval=float(args.interval), region=args.region, language=args.language)
+    write_yt_data(args.filename, data)
 
-    for l in range(0,int(args.number),int(args.batchsize)): 
-        print(f"Getting video #{max(0,l-int(args.batchsize))} to #{l}")
-        page_token = None
-        before = after 
-        after  = before - timedelta(365,0,0) 
-        while len(dataset) < l:
-            print(f"Pulling from api with page_token={page_token}")
-            q, page_token = query(yt,
-                                  batchsize=min(int(args.batchsize), 50),
-                                  page_token=page_token,
-                                  regionCode=args.region,
-                                  before=before,
-                                  after=after)
-            print(f"Fetched {len(q)} items")
-            dataset.extend(q)
-            print(f"Total: {len(dataset)}")
 
-            
-            if page_token is None: 
-                print("Could not get the next page token, stopping")
-                break 
-
-            time.sleep(float(args.interval))
-
-    with open(args.filename, "w") as f: 
-        f.write(json.dumps(dataset)) 
-        f.close()
 
 
