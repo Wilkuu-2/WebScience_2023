@@ -26,8 +26,10 @@ while len(random_song_ids_filtered) < TEST_COUNT:
 
 print("done with lists")
 
-# Loops through every json file in folder and searches for the given song_id. Lastly returning the array of the matching entries.
 def get_all_song_data_points(song_id):
+    """
+    Loops through every json file in folder and searches for the given song_id. Lastly returning the array of the matching entries.
+    """
     song_data_point_list = {}
     for data_point in res:
         for song in data_point.json:
