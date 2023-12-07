@@ -49,6 +49,5 @@ This is because people who listen to song made my an artist might listen to the 
 because they liked the first song.
 The youtube algoritm and it's recommendations
 
-
 ### Another metrics that might affect p*
 Day of the week. People have more time on the weekends.
