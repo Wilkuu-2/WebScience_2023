@@ -4,6 +4,9 @@ import yt_api_crawler as api
 import json 
 import dataclasses
 import matplotlib.pyplot as plt 
+from matplotlib.ticker import StrMethodFormatter 
+import matplotlib.typing
+import numpy as np 
 
 FILENAME="export.json"
 
@@ -80,10 +83,22 @@ if __name__ == "__main__":
     print("\n[INFO]: Parsing, done")
     
     # Plotting 
-    plt.plot(rank, viewcounts)
-    plt.title(f"View count distribution of top {len(sorted_songs)} youtube music videos")
+    fig , (an, al) = plt.subplots(1,2)
+    an.plot(rank, viewcounts)
+    al.loglog(rank,viewcounts, base=np.e)
+    
+    # Make it so the graph does not dump 10 decimal places onto the graph 
+    al.yaxis.set_major_formatter(StrMethodFormatter("{x:.0e}"))
+    al.xaxis.set_major_formatter(StrMethodFormatter("{x:.0e}"))
+
+    # plt.title(f"View count distribution of top {len(sorted_songs)} youtube music videos")
+
+    an.set_title("Linear")
+    al.set_title("Log-Log")
     # plt.xlim((0,rank[-1]))
+    an.set_xlabel("Ranking of the video")
+    an.set_ylabel("Views")
     # plt.ylim((0,viewcounts[0] + 100_000))
-    plt.xlabel("Ranking of the video")
-    plt.ylabel("Views")
+    al.set_xlabel("Ranking of the video")
+    al.set_ylabel("Views")
     plt.show()
