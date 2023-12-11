@@ -65,7 +65,8 @@ async def gen_db(json_folder) -> List[ParsedFile]:
         else: 
             print(f"{filename} is not json")
 
-    return await asyncio.gather(*outputs)
+    outs = await asyncio.gather(*outputs)
+    return sorted(outs, key=lambda o: o.parse_filename())
 
 if __name__ == "__main__": 
     res = asyncio.run(gen_db("youtube_top100"))
