@@ -1,5 +1,5 @@
 #!/bin/env python
-from typing import List, Self, Any
+from typing import List, Any
 import yt_api_crawler as api 
 import json 
 import dataclasses
@@ -18,10 +18,10 @@ class Song:
     title: str = ""
     viewcount: int = 0
 
-    def __lt__(self, other: Self) -> bool:
+    def __lt__(self, other) -> bool:
         return self.viewcount < other.viewcount 
 
-    def __gt__(self, other: Self) -> bool:
+    def __gt__(self, other) -> bool:
         return self.viewcount > other.viewcount 
 
 def get_song_from_json(data: Any, print_dot=False) -> Song:
